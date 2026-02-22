@@ -429,7 +429,9 @@ RUN --mount=type=cache,dst=/var/cache \
         /ctx/build-gnome-extensions && \
         systemctl enable dconf-update.service \
     ; elif grep -q "base" <<< "${BASE_IMAGE_NAME}"; then \
+        :\
     ; else \
+        : \
     ; fi && \
     /ctx/cleanup
 
@@ -500,7 +502,9 @@ RUN --mount=type=cache,dst=/var/cache \
       sed -i 's/\[org.gtk.Settings.FileChooser\]/\[org\/gtk\/settings\/file-chooser\]/g; s/\[org.gtk.gtk4.Settings.FileChooser\]/\[org\/gtk\/gtk4\/settings\/file-chooser\]/g' "/usr/share/ublue-os/dconfs/desktop-silverblue/zz0-00-bazzite-desktop-silverblue-global" && \
       rm "/usr/share/ublue-os/dconfs/desktop-silverblue/zz0-"*"-bazzite-desktop-silverblue-"*".gschema.override" \
     ; elif grep -q "base" <<< "${BASE_IMAGE_NAME}"; then \
+        : \
     ; else \
+        : \
     ; fi && \
     mkdir -p /tmp/bazzite-schema-test && \
     find "/usr/share/glib-2.0/schemas/" -type f ! -name "*.gschema.override" -exec cp {} "/tmp/bazzite-schema-test/" \; && \
@@ -631,7 +635,9 @@ RUN --mount=type=cache,dst=/var/cache \
         dnf5 -y remove \
             malcontent-control \
     ; elif grep -q "base" <<< "${BASE_IMAGE_NAME}"; then \
+        : \
     ; else \
+        : \
     ; fi && \
     /ctx/cleanup
 
@@ -733,7 +739,9 @@ RUN --mount=type=cache,dst=/var/cache \
     ; elif grep -q "kinoite" <<< "${BASE_IMAGE_NAME}"; then \
         systemctl disable usr-share-sddm-themes.mount \
     ; elif grep -q "base" <<< "${BASE_IMAGE_NAME}"; then \
+        : \
     ; else \
+        : \
     ; fi && \
     mkdir -p /tmp/bazzite-schema-test && \
     find "/usr/share/glib-2.0/schemas/" -type f ! -name "*.gschema.override" -exec cp {} "/tmp/bazzite-schema-test/" \; && \
