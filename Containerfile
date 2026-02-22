@@ -429,7 +429,8 @@ RUN --mount=type=cache,dst=/var/cache \
         /ctx/build-gnome-extensions && \
         systemctl enable dconf-update.service \
     ; elif grep -q "base" <<< "${BASE_IMAGE_NAME}"; then \
-        :\
+        dnf5 -y install \
+            tuned-ppd \
     ; else \
         : \
     ; fi && \
