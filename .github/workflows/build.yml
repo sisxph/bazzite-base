@@ -64,16 +64,16 @@ jobs:
           - bazzite-base
           #- bazzite-gnome
           #- bazzite-deck
-          #- bazzite-deck-base
+          - bazzite-deck-base
           #- bazzite-deck-gnome
           #- bazzite-deck-nvidia
-          #- bazzite-deck-nvidia-base
+          - bazzite-deck-nvidia-base
           #- bazzite-deck-nvidia-gnome
           #- bazzite-nvidia
-          #- bazzite-base-nvidia
+          - bazzite-base-nvidia
           #- bazzite-gnome-nvidia
           #- bazzite-nvidia-open
-          #- bazzite-base-nvidia-open
+          - bazzite-base-nvidia-open
           #- bazzite-gnome-nvidia-open
         include:
           - fedora_version: 43
