@@ -116,6 +116,10 @@ RUN --mount=type=cache,dst=/var/cache \
     --mount=type=bind,from=kernel,src=/,dst=/rpms/kernel \
     --mount=type=bind,from=ctx,source=/,target=/ctx \
     --mount=type=tmpfs,dst=/tmp \
+if grep -q "base" <<< "${BASE_IMAGE_NAME}"; then \
+    dnf5 -y install \
+        kernel-tools \
+; fi && \
     /ctx/install-kernel && \
     dnf5 -y config-manager setopt "*rpmfusion*".enabled=0 && \
     rm -rf /.git && \
