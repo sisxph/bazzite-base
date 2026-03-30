@@ -241,7 +241,7 @@ RUN --mount=type=cache,dst=/var/cache \
 RUN --mount=type=cache,dst=/var/cache \
     --mount=type=cache,dst=/var/log \
     --mount=type=bind,from=ctx,source=/,target=/ctx \
-    --mount=type=tmpfs,dst=/tmp \ 
+    --mount=type=tmpfs,dst=/tmp \
     --mount=type=secret,id=GITHUB_TOKEN \
     dnf5 -y install \
         $(/ctx/ghcurl https://api.github.com/repos/ublue-os/cicpoffs/releases/latest | jq -r '.assets[] | select(.name| test(".*rpm$")).browser_download_url') && \
@@ -453,7 +453,7 @@ RUN --mount=type=cache,dst=/var/cache \
         ln -sf /usr/share/wallpapers/convergence.jxl /usr/share/backgrounds/default.jxl && \
         ln -sf /usr/share/wallpapers/convergence.jxl /usr/share/backgrounds/default-dark.jxl && \
         rm -f /usr/share/backgrounds/default.xml \
-    ; else \
+    ; elif grep -q "silverblue" <<< "${BASE_IMAGE_NAME}"; then \
         declare -A toswap=( \
             ["copr:copr.fedorainfracloud.org:ublue-os:bazzite-multilib"]="mutter gnome-shell" \
         ) && \
@@ -491,6 +491,11 @@ RUN --mount=type=cache,dst=/var/cache \
         setfattr -n user.component -v "exe-thumbnailer" /usr/share/thumbnailers/exe-thumbnailer.thumbnailer && \
         /ctx/build-gnome-extensions && \
         systemctl enable dconf-update.service \
+    ; elif grep -q "base" <<< "${BASE_IMAGE_NAME}"; then \
+        dnf5 -y install \
+            tuned-ppd \
+    ; else \
+        : \
     ; fi && \
     /ctx/cleanup
 
@@ -548,7 +553,7 @@ RUN --mount=type=cache,dst=/var/cache \
     if grep -q "kinoite" <<< "${BASE_IMAGE_NAME}"; then \
         systemctl enable usr-share-sddm-themes.mount && \
         sed -i 's@Exec=/usr/bin/ptyxis@Exec=/usr/bin/kde-ptyxis@g' /usr/share/dbus-1/services/org.gnome.Ptyxis.service \
-    ; else \
+    ; elif grep -q "silverblue" <<< "${BASE_IMAGE_NAME}"; then \
         mkdir -p "/usr/share/ublue-os/dconfs/desktop-silverblue/" && \
         cp "/usr/share/glib-2.0/schemas/zz0-"*"-bazzite-desktop-silverblue-"*".gschema.override" "/usr/share/ublue-os/dconfs/desktop-silverblue/" && \
         find "/etc/dconf/db/distro.d/" -maxdepth 1 -type f -exec cp {} "/usr/share/ublue-os/dconfs/desktop-silverblue/" \; && \
@@ -561,6 +566,10 @@ RUN --mount=type=cache,dst=/var/cache \
         glib-compile-schemas --strict /tmp/bazzite-schema-test && \
         glib-compile-schemas /usr/share/glib-2.0/schemas &>/dev/null && \
         rm -r /tmp/bazzite-schema-test \
+    ; elif grep -q "base" <<< "${BASE_IMAGE_NAME}"; then \
+        : \
+    ; else \
+        : \
     ; fi && \
     sed -i 's/stage/none/g' /etc/rpm-ostreed.conf && \
     for repo in \
@@ -678,7 +687,7 @@ RUN --mount=type=cache,dst=/var/cache \
             steamdeck-kde-presets-desktop && \
        dnf5 -y install \
             steamdeck-kde-presets \
-    ; else \
+    ; elif grep -q "silverblue" <<< "${BASE_IMAGE_NAME}"; then \
         dnf5 -y install \
             sddm && \
         ln -sf /usr/share/wallpapers/convergence.jxl /usr/share/backgrounds/default.jxl && \
@@ -686,6 +695,10 @@ RUN --mount=type=cache,dst=/var/cache \
         rm -f /usr/share/backgrounds/default.xml && \
         dnf5 -y remove \
             malcontent-control \
+    ; elif grep -q "base" <<< "${BASE_IMAGE_NAME}"; then \
+        : \
+    ; else \
+        : \
     ; fi && \
     /ctx/cleanup
 
@@ -787,8 +800,12 @@ RUN --mount=type=cache,dst=/var/cache \
     if grep -q "silverblue" <<< "${BASE_IMAGE_NAME}"; then \
         systemctl disable gdm.service && \
         systemctl enable sddm.service \
-    ; else \
+    ; elif grep -q "kinoite" <<< "${BASE_IMAGE_NAME}"; then \
         systemctl disable usr-share-sddm-themes.mount \
+    ; elif grep -q "base" <<< "${BASE_IMAGE_NAME}"; then \
+        : \
+    ; else \
+        : \
     ; fi && \
     { rm -v /usr/share/applications/bazzite-steam-bpm.desktop || true; } && \
     systemctl enable hhd.service && \
