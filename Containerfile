@@ -466,7 +466,17 @@ RUN --mount=type=cache,dst=/var/cache \
         rm -f /usr/share/backgrounds/default.xml && \
         mkdir -p /usr/share/wallpapers/bazzite/convergence/contents/images && \
         ln -s /usr/share/wallpapers/convergence.jxl /usr/share/wallpapers/bazzite/convergence/contents/images/3940x2160.jxl \
-    ; else \
+    ; elif grep -q "silverblue" <<< "${BASE_IMAGE_NAME}"; then \
+        declare -A toswap=( \
+            ["copr:copr.fedorainfracloud.org:ublue-os:bazzite-multilib"]="mutter gnome-shell" \
+        ) && \
+        for repo in "${!toswap[@]}"; do \
+            for package in ${toswap[$repo]}; do dnf5 -y swap --repo=$repo $package $package; done; \
+        done && unset -v toswap repo package && \
+        dnf5 versionlock add \
+            mutter \
+            gnome-shell \
+            gsettings-desktop-schemas && \
         dnf5 -y install \
             nautilus-gsconnect \
             steamdeck-backgrounds \
@@ -494,6 +504,11 @@ RUN --mount=type=cache,dst=/var/cache \
         setfattr -n user.component -v "exe-thumbnailer" /usr/share/thumbnailers/exe-thumbnailer.thumbnailer && \
         /ctx/build-gnome-extensions && \
         systemctl enable dconf-update.service \
+    ; elif grep -q "base" <<< "${BASE_IMAGE_NAME}"; then \
+        dnf5 -y install \
+            tuned-ppd \
+    ; else \
+        : \
     ; fi && \
     dnf5 -y install \
         rom-properties-utils && \
@@ -552,7 +567,10 @@ RUN --mount=type=cache,dst=/var/cache \
     echo "import \"/usr/share/ublue-os/just/90-bazzite-de.just\"" >> /usr/share/ublue-os/justfile && \
     echo "import \"/usr/share/ublue-os/just/91-bazzite-decky.just\"" >> /usr/share/ublue-os/justfile && \
     echo "import \"/usr/share/ublue-os/just/92-bazzite-verify.just\"" >> /usr/share/ublue-os/justfile && \
-    if grep -q "silverblue" <<< "${BASE_IMAGE_NAME}"; then \
+    if grep -q "kinoite" <<< "${BASE_IMAGE_NAME}"; then \
+        systemctl enable usr-share-sddm-themes.mount && \
+        sed -i 's@Exec=/usr/bin/ptyxis@Exec=/usr/bin/kde-ptyxis@g' /usr/share/dbus-1/services/org.gnome.Ptyxis.service \
+    ; elif grep -q "silverblue" <<< "${BASE_IMAGE_NAME}"; then \
         mkdir -p "/usr/share/ublue-os/dconfs/desktop-silverblue/" && \
         cp "/usr/share/glib-2.0/schemas/zz0-"*"-bazzite-desktop-silverblue-"*".gschema.override" "/usr/share/ublue-os/dconfs/desktop-silverblue/" && \
         find "/etc/dconf/db/distro.d/" -maxdepth 1 -type f -exec cp {} "/usr/share/ublue-os/dconfs/desktop-silverblue/" \; && \
@@ -565,6 +583,10 @@ RUN --mount=type=cache,dst=/var/cache \
         glib-compile-schemas --strict /tmp/bazzite-schema-test && \
         glib-compile-schemas /usr/share/glib-2.0/schemas &>/dev/null && \
         rm -r /tmp/bazzite-schema-test \
+    ; elif grep -q "base" <<< "${BASE_IMAGE_NAME}"; then \
+        : \
+    ; else \
+        : \
     ; fi && \
     sed -i 's/stage/none/g' /etc/rpm-ostreed.conf && \
     for repo in \
@@ -680,12 +702,18 @@ RUN --mount=type=cache,dst=/var/cache \
             steamdeck-kde-presets-desktop && \
        dnf5 -y install \
             steamdeck-kde-presets \
-    ; else \
+    ; elif grep -q "silverblue" <<< "${BASE_IMAGE_NAME}"; then \
+        dnf5 -y install \
+            sddm && \
         ln -sf /usr/share/wallpapers/convergence.jxl /usr/share/backgrounds/default.jxl && \
         ln -sf /usr/share/wallpapers/convergence.jxl /usr/share/backgrounds/default-dark.jxl && \
         rm -f /usr/share/backgrounds/default.xml && \
         dnf5 -y remove \
             malcontent-control \
+    ; elif grep -q "base" <<< "${BASE_IMAGE_NAME}"; then \
+        : \
+    ; else \
+        : \
     ; fi && \
     if grep -q "silverblue" <<< "${BASE_IMAGE_NAME}"; then \
         systemctl disable gdm.service \
@@ -793,6 +821,16 @@ RUN --mount=type=cache,dst=/var/cache \
     do \
         dnf5 -y copr disable -y $copr; \
     done && unset -v copr && \
+    if grep -q "silverblue" <<< "${BASE_IMAGE_NAME}"; then \
+        systemctl disable gdm.service && \
+        systemctl enable sddm.service \
+    ; elif grep -q "kinoite" <<< "${BASE_IMAGE_NAME}"; then \
+        systemctl disable usr-share-sddm-themes.mount \
+    ; elif grep -q "base" <<< "${BASE_IMAGE_NAME}"; then \
+        : \
+    ; else \
+        : \
+    ; fi && \
     { rm -v /usr/share/applications/bazzite-steam-bpm.desktop || true; } && \
     systemctl enable --global steamos-manager.service && \
     systemctl enable steamos-manager.service && \
